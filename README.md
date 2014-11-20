@@ -56,11 +56,12 @@ Generate the simulated genome with the following (requires [PCAP-core](https://g
 
     # use the full reference to map back to
     # you can kill this when it gets to bam_stats as they aren't needed.
-    bwa_mem.pl -o inSilico -r fullref.fa -s inSilico -t 24
+    bwa_mem.pl -o inSilico -r fullref.fa -s inSilico -t 24 primary.bam >& map.log&
 
-    # generate the GC bins
+    # generate the GC bins using the resulting mapped data.
     gcBinGeneration.pl -i inSilico.bam -o cn_bins -f csv -g fullref.fa
-    #
+
+    # compress the output file (or not the code will cope with either)
     gzip cn_bins.csv
 
 #### snp6.csv.gz
@@ -74,3 +75,5 @@ This file is based on the SNP6 loci vs GRCh37.  The format is as follows:
 * freq - Frequency of alleleA in population.
 
 The tools in this package don't require the ``REF`` or ``rsID`` values to be present (use ``.``).
+
+The file can be gzip compressed or native.
