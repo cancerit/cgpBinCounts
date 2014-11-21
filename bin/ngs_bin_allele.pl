@@ -63,7 +63,7 @@ sub allele_counts {
   my $sam = Bio::DB::Sam->new(-bam => $bam_l);
   my $header = $sam->header;
 
-  my $sample = sample_name($header);
+  my $sample = Sanger::CGP::BinAllele::sample_name($bam_l);
   my $outfile = "$out_l/$sample.allelic_counts";
   $outfile .= ".$restrict_l" if(defined $restrict_l);
   $outfile .= '.csv.gz';
