@@ -2,7 +2,7 @@ LICENCE
 =======
 Copyright (c) 2014 Genome Research Ltd.
 
-Author: CancerIT <cgpit@sanger.ac.uk>
+Author: Cancer Genome Project <cgpit@sanger.ac.uk>
 
 This file is part of cgpBinCounts.
 
