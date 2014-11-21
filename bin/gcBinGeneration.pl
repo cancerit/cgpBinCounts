@@ -91,7 +91,7 @@ sub process {
       print $OUT "\n";
       $bin_start = $align->start + 1;
       $read_starts = 0;
-exit if($bin_counts > 100);
+#exit if($bin_counts > 100);
     }
   }
   close $OUT;
