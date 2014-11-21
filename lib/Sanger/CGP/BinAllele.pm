@@ -4,6 +4,7 @@ use strict;
 
 use Const::Fast qw(const);
 use base 'Exporter';
+use Capture::Tiny qw(capture);
 
 our $VERSION = '1.0.0';
 our @EXPORT = qw($VERSION);
