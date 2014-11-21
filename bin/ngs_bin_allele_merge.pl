@@ -46,7 +46,7 @@ if(scalar @ARGV < 2) {
 my $control_bam = shift;
 my $indir = shift;
 
-my $cntl_sample = sample_name($control_bam);
+my $cntl_sample = Sanger::CGP::BinAllele::sample_name($control_bam);
 my %tumour_samples;
 my %file_sets;
 opendir(my $dh, $indir);
@@ -73,7 +73,7 @@ for my $tum_samp(keys %tumour_samples) {
   my $command = join ' ', 'tar -C', $indir, '-czf', $archive, $tum_samp;
   my ($stdout, $stderr, $exit) = capture { system($command); };
   die $stderr if($exit != 0);
-  md5file($archive);
+  Sanger::CGP::BinAllele::md5file($archive);
 }
 
 sub merge_files {
@@ -86,24 +86,4 @@ sub merge_files {
     my ($stdout, $stderr, $exit) = capture { system($command); };
     die $stderr if($exit != 0);
   }
-}
-
-sub sample_name {
-  my $control_bam = shift;
-  my @lines = split /\n/, Bio::DB::Sam->new(-bam => $control_bam)->header->text;
-  my $sample;
-  for(@lines) {
-    if($_ =~ m/^\@RG.*\tSM:([^\t]+)/) {
-      $sample = $1;
-      last;
-    }
-  }
-  die "Failed to determine sample from BAM header\n" unless(defined $sample);
-  return $sample;
-}
-
-sub md5file {
-  my $file = shift;
-  my ($stdout, $stderr, $exit) = capture { system(qq{md5sum $file | awk '{print \$1}' > $file.md5}); };
-  die $stderr if($exit != 0);
 }

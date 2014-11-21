@@ -43,7 +43,7 @@ use Sanger::CGP::BinAllele;
 
 if(scalar @ARGV < 4) {
   warn 'VERSION: '.Sanger::CGP::BinAllele->VERSION."\n";
-  die "USAGE: ./ngs_bin_allele.pl bin_targets.csv[.gz] snp6alleles.csv[.gz] outdir my.bam [this_chr_only]\n";
+  die "USAGE: ./ngs_bin_allele.pl cn_bins.csv[.gz] snp6.csv[.gz] outdir my.bam [this_chr_only]\n";
 }
 
 my $bin_file = shift;
@@ -117,7 +117,7 @@ sub bin_counts {
   my $header = $sam->header;
   my $bai = Bio::DB::Bam->index_open($bam_l);
 
-  my $sample = sample_name($header);
+  my $sample = Sanger::CGP::BinAllele::sample_name($bam_l);
   my $outfile = "$out_l/$sample.bin_counts";
   $outfile .= ".$restrict_l" if(defined $restrict_l);
   $outfile .= '.csv.gz';
@@ -150,18 +150,4 @@ sub bin_counts {
   }
   close $gzip;
   close $gunzip;
-}
-
-sub sample_name {
-  my $header = shift;
-  my @lines = split /\n/, $header->text;
-  my $sample;
-  for(@lines) {
-    if($_ =~ m/^\@RG.*\tSM:([^\t]+)/) {
-      $sample = $1;
-      last;
-    }
-  }
-  die "Failed to determine sample from BAM header\n" unless(defined $sample);
-  return $sample;
 }

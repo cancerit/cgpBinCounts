@@ -34,4 +34,24 @@ sub license {
   return sprintf $LICENSE, $VERSION;
 }
 
+sub sample_name {
+  my $bam = shift;
+  my @lines = split /\n/, Bio::DB::Sam->new(-bam => $bam)->header->text;
+  my $sample;
+  for(@lines) {
+    if($_ =~ m/^\@RG.*\tSM:([^\t]+)/) {
+      $sample = $1;
+      last;
+    }
+  }
+  die "Failed to determine sample from BAM header\n" unless(defined $sample);
+  return $sample;
+}
+
+sub md5file {
+  my $file = shift;
+  my ($stdout, $stderr, $exit) = capture { system(qq{md5sum $file | awk '{print \$1}' > $file.md5}); };
+  die $stderr if($exit != 0);
+}
+
 1;
