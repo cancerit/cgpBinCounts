@@ -1,4 +1,3 @@
-bin/cpanm
 bin/gcBinGeneration.pl
 bin/ngs_bin_allele.pl
 bin/ngs_bin_allele_merge.pl
