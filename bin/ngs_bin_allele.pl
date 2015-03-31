@@ -1,9 +1,7 @@
 #!/usr/bin/perl
 
-#./ngs_bin_allele.pl /nfs/cancer_ref01/human/37/genome.cn_bins.csv /nfs/cancer_ref01/human/37/genome.snp6.txt /var/tmp/kr2/ngsbins /nfs/cancer_ref01/nst_links/live/917/PD13371a/PD13371a.bam 21
-
 ########## LICENCE ##########
-# Copyright (c) 2014 Genome Research Ltd.
+# Copyright (c) 2014,2015 Genome Research Ltd.
 #
 # Author: Cancer Genome Project <cgpit@sanger.ac.uk>
 #
@@ -21,6 +19,16 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
+
+# 1. The usage of a range of years within a copyright statement contained within
+# this distribution should be interpreted as being equivalent to a list of years
+# including the first and last year specified and all consecutive years between
+# them. For example, a copyright statement that reads ‘Copyright (c) 2005, 2007-
+# 2009, 2011-2012’ should be interpreted as being identical to a statement that
+# reads ‘Copyright (c) 2005, 2007, 2008, 2009, 2011, 2012’ and a copyright
+# statement that reads ‘Copyright (c) 2005-2012’ should be interpreted as being
+# identical to a statement that reads ‘Copyright (c) 2005, 2006, 2007, 2008,
+# 2009, 2010, 2011, 2012’."
 ########## LICENCE ##########
 
 use FindBin;
@@ -55,7 +63,7 @@ $restrict_to = shift if(scalar @ARGV);
 
 make_path $outdir unless(-d $outdir);
 
-bin_counts($outdir, $bam_in, $bin_file, $restrict_to);
+#bin_counts($outdir, $bam_in, $bin_file, $restrict_to);
 allele_counts($outdir, $bam_in, $allele_file, $restrict_to);
 
 sub allele_counts {
@@ -71,6 +79,7 @@ sub allele_counts {
   my $gzip = new IO::Compress::Gzip $outfile or die "gzip to $outfile failed: $GzipError\n";
   my $gunzip = new IO::Uncompress::Gunzip $allele_l or die "IO::Uncompress::Gunzip failed: $GunzipError\n";
   while(my $line = <$gunzip>) {
+    chomp $line;
     my ($chr, $start, undef, undef, $allA, $allB, $freq) = split /[,]/, $line;
     next if(defined $restrict_l && $chr ne $restrict_l);
 
