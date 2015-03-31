@@ -63,7 +63,7 @@ $restrict_to = shift if(scalar @ARGV);
 
 make_path $outdir unless(-d $outdir);
 
-#bin_counts($outdir, $bam_in, $bin_file, $restrict_to);
+bin_counts($outdir, $bam_in, $bin_file, $restrict_to);
 allele_counts($outdir, $bam_in, $allele_file, $restrict_to);
 
 sub allele_counts {

@@ -6,7 +6,7 @@ use Const::Fast qw(const);
 use base 'Exporter';
 use Capture::Tiny qw(capture);
 
-our $VERSION = '1.0.1';
+our $VERSION = '1.0.2';
 our @EXPORT = qw($VERSION);
 
 const my $LICENSE =>
