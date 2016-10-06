@@ -47,5 +47,6 @@ WriteMakefile(
                      'Const::Fast' => 0.014,
                      'Bio::DB::HTS' => 1.11,
                      'Capture::Tiny' => 0.27,
+                     'IPC::System::Simple' => 0.00,
                    }
 );

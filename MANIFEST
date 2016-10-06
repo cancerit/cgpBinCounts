@@ -1,6 +1,9 @@
+.travis.yml
+bin/binCountsToBedGraph.pl
 bin/gcBinGeneration.pl
 bin/ngs_bin_allele.pl
 bin/ngs_bin_allele_merge.pl
+bin/ngsBinCounts.pl
 docs.tar.gz
 lib/Sanger/CGP/BinAllele.pm
 Makefile.PL

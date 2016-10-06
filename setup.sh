@@ -135,7 +135,8 @@ fi
 if [ -e $SETUP_DIR/basePerlDeps.success ]; then
   echo "Previously installed base perl deps..."
 else
-  perlmods=("Bio::Root::Version~1.006009001" "Const::Fast")
+#"ExtUtils::CBuilder" "Module::Build~0.42" "File::ShareDir" "File::ShareDir::Install" "Const::Fast" "File::Which" "LWP::UserAgent"
+  perlmods=("Bio::Root::Version~1.006009001")
   for i in "${perlmods[@]}" ; do
     $SETUP_DIR/cpanm -v --no-interactive --notest --mirror http://cpan.metacpan.org -l $INST_PATH $i
   done
@@ -176,6 +177,8 @@ if [[ "x$CHK" == "x" ]] ; then
 else
   echo "Bio::DB::HTS already installed"
 fi
+
+exit
 
 set -x
 $SETUP_DIR/cpanm -v --mirror http://cpan.metacpan.org --notest -l $INST_PATH/ --installdeps . < /dev/null
