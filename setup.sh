@@ -85,22 +85,6 @@ echo "Max compilation CPUs set to $CPU"
 # get current directory
 INIT_DIR=`pwd`
 
-# re-initialise log file
-echo > $INIT_DIR/setup.log
-
-# log information about this system
-(
-    echo '============== System information ===='
-    set -x
-    lsb_release -a
-    uname -a
-    sw_vers
-    system_profiler
-    grep MemTotal /proc/meminfo
-    set +x
-    echo; echo
-) >>$INIT_DIR/setup.log 2>&1
-
 # cleanup inst_path
 mkdir -p $INST_PATH/bin
 cd $INST_PATH
@@ -138,12 +122,13 @@ else
 #"ExtUtils::CBuilder" "Module::Build~0.42" "File::ShareDir" "File::ShareDir::Install" "Const::Fast" "File::Which" "LWP::UserAgent"
   perlmods=("Bio::Root::Version~1.006009001")
   for i in "${perlmods[@]}" ; do
-    $SETUP_DIR/cpanm -v --no-interactive --notest --mirror http://cpan.metacpan.org -l $INST_PATH $i
+    $SETUP_DIR/cpanm --no-interactive --notest --mirror http://cpan.metacpan.org -l $INST_PATH $i
   done
   touch $SETUP_DIR/basePerlDeps.success
 fi
 
 CHK=`perl -le 'eval "require $ARGV[0]" and print $ARGV[0]->VERSION' Bio::DB::HTS`
+set -ex
 if [[ "x$CHK" == "x" ]] ; then
   echo -n "Get htslib ..."
   if [ -e $SETUP_DIR/htslibGet.success ]; then
@@ -178,13 +163,9 @@ else
   echo "Bio::DB::HTS already installed"
 fi
 
-set -e
-
-set -x
-$SETUP_DIR/cpanm -v --mirror http://cpan.metacpan.org --notest -l $INST_PATH/ --installdeps . < /dev/null
-set +x
-
 cd $INIT_DIR
+$SETUP_DIR/cpanm --mirror http://cpan.metacpan.org --notest -l $INST_PATH/ --installdeps . < /dev/null
+
 perl Makefile.PL INSTALL_BASE=$INST_PATH
 make
 make test
@@ -192,6 +173,8 @@ make install
 
 # cleanup all junk
 rm -rf $SETUP_DIR
+
+set +x
 
 echo
 echo
