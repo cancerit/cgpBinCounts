@@ -180,11 +180,12 @@ fi
 
 exit
 
+set -e
+
 set -x
 $SETUP_DIR/cpanm -v --mirror http://cpan.metacpan.org --notest -l $INST_PATH/ --installdeps . < /dev/null
 set +x
 
-set -e
 cd $INIT_DIR
 perl Makefile.PL INSTALL_BASE=$INST_PATH
 make
