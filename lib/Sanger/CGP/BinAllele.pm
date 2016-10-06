@@ -5,13 +5,14 @@ use strict;
 use Const::Fast qw(const);
 use base 'Exporter';
 use Capture::Tiny qw(capture);
+use Bio::DB::HTS;
 
 our $VERSION = '1.0.2';
 our @EXPORT = qw($VERSION);
 
 const my $LICENSE =>
 '#################
-# Copyright (c) 2014,2015 Genome Research Ltd.
+# Copyright (c) 2014-2016 Genome Research Ltd.
 #
 # Author: Cancer Genome Project <cgpit@sanger.ac.uk>
 #
@@ -47,7 +48,7 @@ sub license {
 
 sub sample_name {
   my $bam = shift;
-  my @lines = split /\n/, Bio::DB::Sam->new(-bam => $bam)->header->text;
+  my @lines = split /\n/, Bio::DB::HTS->new(-bam => $bam)->header->text;
   my $sample;
   for(@lines) {
     if($_ =~ m/^\@RG.*\tSM:([^\t]+)/) {

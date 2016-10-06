@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 ########## LICENCE ##########
-# Copyright (c) 2014,2015 Genome Research Ltd.
+# Copyright (c) 2014-2016 Genome Research Ltd.
 #
 # Author: Cancer Genome Project <cgpit@sanger.ac.uk>
 #
@@ -40,10 +40,12 @@ WriteMakefile(
   VERSION_FROM  => 'lib/Sanger/CGP/BinAllele.pm',
   EXE_FILES     => [qw( bin/ngs_bin_allele.pl
                         bin/ngs_bin_allele_merge.pl
-                        bin/gcBinGeneration.pl )],
+                        bin/gcBinGeneration.pl
+                        bin/ngsBinCounts.pl
+                        bin/binCountsToBedGraph.pl )],
   PREREQ_PM     => {
                      'Const::Fast' => 0.014,
-                     'Bio::DB::Sam' => 1.12,
+                     'Bio::DB::HTS' => 1.11,
                      'Capture::Tiny' => 0.27,
                    }
 );

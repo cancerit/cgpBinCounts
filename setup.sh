@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ########## LICENCE ##########
-# Copyright (c) 2014,2015 Genome Research Ltd.
+# Copyright (c) 2014-2016 Genome Research Ltd.
 #
 # Author: Cancer Genome Project <cgpit@sanger.ac.uk>
 #
@@ -31,18 +31,10 @@
 # 2009, 2010, 2011, 2012’."
 ########## LICENCE ##########
 
-done_message () {
-    if [ $? -eq 0 ]; then
-        echo " done."
-        if [ "x$1" != "x" ]; then
-            echo $1
-        fi
-    else
-        echo " failed.  See setup.log file for error messages." $2
-        echo "    Please check INSTALL file for items that should be installed by a package manager"
-        exit 1
-    fi
-}
+
+# Bio::DB::HTS
+SOURCE_BIOBDHTS="https://github.com/Ensembl/Bio-HTS/archive/2.3.tar.gz"
+SOURCE_HTSLIB="https://github.com/samtools/htslib/releases/download/1.3.1/htslib-1.3.1.tar.bz2"
 
 get_file () {
 # output, source
@@ -50,6 +42,26 @@ get_file () {
     curl --insecure -sS -o $1 -L $2
   else
     wget -nv -O $1 $2
+  fi
+}
+
+get_distro () {
+  EXT=""
+  if [[ $2 == *.tar.bz2* ]] ; then
+    EXT="tar.bz2"
+  elif [[ $2 == *.zip* ]] ; then
+    EXT="zip"
+  elif [[ $2 == *.tar.gz* ]] ; then
+    EXT="tar.gz"
+  else
+    echo "I don't understand the file type for $1"
+    exit 1
+  fi
+  rm -f $1.$EXT
+  if hash curl 2>/dev/null; then
+    curl --retry 10 -sS -o $1.$EXT -L $2
+  else
+    wget --tries=10 -nv -O $1.$EXT $2
   fi
 }
 
@@ -101,16 +113,8 @@ mkdir -p $SETUP_DIR
 
 # make sure that build is self contained
 unset PERL5LIB
-ARCHNAME=`perl -e 'use Config; print $Config{archname};'`
 PERLROOT=$INST_PATH/lib/perl5
-PERLARCH=$PERLROOT/$ARCHNAME
-export PERL5LIB="$PERLROOT:$PERLARCH"
-
-CHK=`perl -le 'eval "require $ARGV[0]" and print $ARGV[0]->VERSION' Bio::DB::Sam`
-if [[ "x$CHK" == "x" ]] ; then
-  echo "PREREQUISITE: Please install Bio::DB::Sam before proceeding"
-  exit 1;
-fi
+export PERL5LIB="$PERLROOT"
 
 #add bin path for install tests
 export PATH="$INST_PATH/bin:$PATH"
@@ -127,23 +131,63 @@ if ! ( perl -MExtUtils::MakeMaker -e 1 >/dev/null 2>&1); then
     echo
     echo "WARNING: Your Perl installation does not seem to include a complete set of core modules.  Attempting to cope with this, but if installation fails please make sure that at least ExtUtils::MakeMaker is installed.  For most users, the best way to do this is to use your system's package manager: apt, yum, fink, homebrew, or similar."
 fi
-(
-  set -x
-  $SETUP_DIR/cpanm -v --mirror http://cpan.metacpan.org --notest -l $INST_PATH/ --installdeps . < /dev/null
-  set +x
-) >>$INIT_DIR/setup.log 2>&1
-done_message "" "Failed during installation of core dependencies."
 
-echo -n "Installing cgpBinCounts ..."
-(
-  set -e
-  cd $INIT_DIR
-  perl Makefile.PL INSTALL_BASE=$INST_PATH
-  make
-  make test
-  make install
-) >>$INIT_DIR/setup.log 2>&1
-done_message "" "cgpBinCounts install failed."
+if [ -e $SETUP_DIR/basePerlDeps.success ]; then
+  echo "Previously installed base perl deps..."
+else
+#"ExtUtils::CBuilder" "Module::Build~0.42" "File::ShareDir" "File::ShareDir::Install" "Const::Fast" "File::Which" "LWP::UserAgent"
+  perlmods=("Bio::Root::Version~1.006009001")
+  for i in "${perlmods[@]}" ; do
+    $SETUP_DIR/cpanm -v --no-interactive --notest --mirror http://cpan.metacpan.org -l $INST_PATH $i
+  done
+  touch $SETUP_DIR/basePerlDeps.success
+fi
+
+CHK=`perl -le 'eval "require $ARGV[0]" and print $ARGV[0]->VERSION' Bio::DB::HTS`
+if [[ "x$CHK" == "x" ]] ; then
+  echo -n "Get htslib ..."
+  if [ -e $SETUP_DIR/htslibGet.success ]; then
+    echo " already staged ...";
+  else
+    echo
+    cd $SETUP_DIR
+    get_distro "htslib" $SOURCE_HTSLIB
+    echo " DONE";
+    touch $SETUP_DIR/htslibGet.success
+  fi
+  echo -n "Building Bio::DB::HTS..."
+  cd $SETUP_DIR
+  rm -rf bioDbHts
+  get_distro "bioDbHts" $SOURCE_BIOBDHTS
+
+  mkdir -p bioDbHts/htslib
+  tar --strip-components 1 -C bioDbHts -zxf bioDbHts.tar.gz
+  tar --strip-components 1 -C bioDbHts/htslib -jxf $SETUP_DIR/htslib.tar.bz2
+  cd bioDbHts/htslib
+  perl -pi -e 'if($_ =~ m/^CFLAGS/ && $_ !~ m/\-fPIC/i){chomp; s/#.+//; $_ .= " -fPIC -Wno-unused -Wno-unused-result\n"};' Makefile
+  make -j$CPU
+  rm -f libhts.so*
+  cd ../
+  env HTSLIB_DIR=$SETUP_DIR/bioDbHts/htslib perl Build.PL --install_base=$INST_PATH
+  ./Build test
+  ./Build install
+  cd $SETUP_DIR
+  rm -f bioDbHts.tar.gz
+  echo " DONE"
+else
+  echo "Bio::DB::HTS already installed"
+fi
+
+set -x
+$SETUP_DIR/cpanm -v --mirror http://cpan.metacpan.org --notest -l $INST_PATH/ --installdeps . < /dev/null
+set +x
+
+set -e
+cd $INIT_DIR
+perl Makefile.PL INSTALL_BASE=$INST_PATH
+make
+make test
+make install
 
 # cleanup all junk
 rm -rf $SETUP_DIR

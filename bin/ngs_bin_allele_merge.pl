@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 ########## LICENCE ##########
-# Copyright (c) 2014,2015 Genome Research Ltd.
+# Copyright (c) 2014-2016 Genome Research Ltd.
 #
 # Author: Cancer Genome Project <cgpit@sanger.ac.uk>
 #
@@ -41,8 +41,6 @@ use autodie qw(:all);
 use File::Path qw(make_path);
 use File::Copy;
 use Capture::Tiny qw(capture);
-
-use Bio::DB::Sam;
 
 use Sanger::CGP::BinAllele;
 

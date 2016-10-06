@@ -40,7 +40,7 @@ use warnings;
 use Getopt::Long 'GetOptions';
 use Pod::Usage;
 
-use Bio::DB::Sam;
+use Bio::DB::HTS;
 use Carp;
 
 use Const::Fast qw(const);
@@ -59,7 +59,7 @@ sub process {
   my ($options) = @_;
   open my $OUT, '>', $options->{'o'} or croak 'Failed to create '.$options->{'o'}."\n$!\n";
 
-  my $sam = Bio::DB::Sam->new(-fasta => $options->{'g'},
+  my $sam = Bio::DB::HTS->new(-fasta => $options->{'g'},
                               -bam   => $options->{'i'},
                               -split_splices => 1
                               );
