@@ -178,8 +178,6 @@ else
   echo "Bio::DB::HTS already installed"
 fi
 
-exit
-
 set -e
 
 set -x
