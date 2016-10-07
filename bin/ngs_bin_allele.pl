@@ -133,9 +133,10 @@ sub bin_counts {
 
   my $gzip = new IO::Compress::Gzip $outfile or die "gzip to $outfile failed: $GzipError\n";
   my $gunzip = new IO::Uncompress::Gunzip $bins_l or die "IO::Uncompress::Gunzip failed: $GunzipError\n";
+  my $no_gc_warned = 0;
   while(my $line = <$gunzip>) {
     chomp $line;
-    my ($chr, $start, $end, $gc) = (split /,/, $line)[1..4];
+    my ($chr, $start, $end, $gc) = split /[,\t]/, $line;
     next if(defined $restrict_l && $chr ne $restrict_l);
     my $count = 0;
     $bai->fetch($bam,
@@ -155,7 +156,13 @@ sub bin_counts {
                   1;
                 }
     );
-    print $gzip join(q{,}, $chr, $start, $end, $count, $gc),"\n" or die "Failed to write line to $outfile: $!\n";
+    if(defined $gc) {
+      print $gzip join(q{,}, $chr, $start, $end, $count, $gc),"\n" or die "Failed to write line to $outfile: $!\n";
+    }
+    else {
+      warn "WARN: No GC column in file $bins_l, ommitting from output\n" unless($no_gc_warned++);
+      print $gzip join(q{,}, $chr, $start, $end, $count),"\n" or die "Failed to write line to $outfile: $!\n";
+    }
   }
   close $gzip;
   close $gunzip;
